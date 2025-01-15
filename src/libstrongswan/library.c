@@ -161,6 +161,8 @@ void library_deinit()
 	/* make sure the cache is clear before unloading plugins */
 	lib->credmgr->flush_cache(lib->credmgr, CERT_ANY);
 
+	key_exchange_deinit();
+
 	this->public.streams->destroy(this->public.streams);
 	this->public.watcher->destroy(this->public.watcher);
 	this->public.scheduler->destroy(this->public.scheduler);
@@ -276,6 +278,7 @@ static void do_magic(int *magic, int **out)
 /**
  * Check if memwipe works as expected
  */
+ADDRESS_SANITIZER_EXCLUDE
 static bool check_memwipe()
 {
 	int magic = 0xCAFEBABE, *buf, i;
@@ -436,7 +439,7 @@ bool library_init(char *settings, const char *namespace)
 #endif /* INTEGRITY_TEST */
 	}
 
-	diffie_hellman_init();
+	key_exchange_init();
 
 	return !this->init_failed;
 }

@@ -623,6 +623,7 @@ static char *whitelist[] = {
 	"EVP_MD_fetch",
 	"EVP_SIGNATURE_fetch",
 	"OSSL_DECODER_do_all_provided",
+	"OSSL_DECODER_CTX_new_for_pkey",
 	"OSSL_ENCODER_do_all_provided",
 	"OSSL_PROVIDER_try_load",
 	"OSSL_PROVIDER_load",
@@ -632,6 +633,9 @@ static char *whitelist[] = {
 	"CRYPTO_get_ex_new_index",
 	/* OpenSSL libssl */
 	"SSL_COMP_get_compression_methods",
+	/* AWS-LC */
+	"RAND_bytes",
+	"ERR_put_error",
 	/* NSPR */
 	"PR_CallOnce",
 	/* libapr */
