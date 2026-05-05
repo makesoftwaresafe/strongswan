@@ -806,6 +806,13 @@ static bool verify_trust_chain(private_credential_manager_t *this,
 				call_hook(this, CRED_HOOK_NO_ISSUER, current);
 				if (trusted)
 				{
+					if (!check_lifetime(this, current,
+										current != subject ? "issuer" : "subject",
+										pathlen, FALSE, auth))
+					{
+						trusted = FALSE;
+						break;
+					}
 					DBG1(DBG_CFG, "  reached end of incomplete trust chain for "
 						 "trusted certificate \"%Y\"",
 						 subject->get_subject(subject));
