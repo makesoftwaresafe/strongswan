@@ -919,6 +919,7 @@ METHOD(enumerator_t, trusted_enumerate, bool,
 {
 	certificate_t *current, **cert;
 	auth_cfg_t **auth;
+	bool is_valid_self_signed = FALSE;
 
 	VA_ARGS_VGET(args, cert, auth);
 
@@ -942,19 +943,25 @@ METHOD(enumerator_t, trusted_enumerate, bool,
 			}
 			DBG1(DBG_CFG, "  using trusted certificate \"%Y\"",
 				 this->pretrusted->get_subject(this->pretrusted));
-			/* if we find a trusted self signed certificate, we just accept it.
-			 * However, in order to fulfill authorization rules, we try to build
-			 * the trust chain if it is not self signed */
-			if (issued_by(this->this, this->pretrusted, this->pretrusted, NULL) ||
+			/* if we find a trusted self-signed certificate, check expiry... */
+			if (issued_by(this->this, this->pretrusted, this->pretrusted, NULL))
+			{
+				if (!check_lifetime(this->this, this->pretrusted, "subject", 0,
+									TRUE, this->auth))
+				{
+					return FALSE;
+				}
+				this->auth->add(this->auth, AUTH_RULE_SUBJECT_CERT,
+								this->pretrusted->get_ref(this->pretrusted));
+				is_valid_self_signed = TRUE;
+			}
+			/* ...for non-self-signed certificates, verify the full trust chain
+			 * to fulfill authorization rules */
+			if (is_valid_self_signed ||
 				verify_trust_chain(this->this, this->pretrusted, this->auth,
 								   TRUE, this->online))
 			{
 				*cert = this->pretrusted;
-				if (!this->auth->get(this->auth, AUTH_RULE_SUBJECT_CERT))
-				{	/* add cert to auth info, if not returned by trustchain */
-					this->auth->add(this->auth, AUTH_RULE_SUBJECT_CERT,
-									this->pretrusted->get_ref(this->pretrusted));
-				}
 				if (auth)
 				{
 					*auth = this->auth;
