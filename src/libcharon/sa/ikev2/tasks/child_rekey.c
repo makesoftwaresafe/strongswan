@@ -1190,6 +1190,7 @@ METHOD(task_t, migrate, void,
 
 	this->ike_sa = ike_sa;
 	this->collision = NULL;
+	this->deleted_spis = NULL;
 	this->flags = 0;
 }
 
