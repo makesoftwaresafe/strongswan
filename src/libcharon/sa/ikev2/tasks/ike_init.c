@@ -1014,6 +1014,7 @@ static bool derive_keys_internal(private_ike_init_t *this, chunk_t nonce_i,
 		 * our own SA as old SA to get SK_d */
 		old_sa = this->ike_sa;
 		array_insert_create(&kes, ARRAY_HEAD, this->ke);
+		this->ke = NULL;
 	}
 
 	id = this->ike_sa->get_id(this->ike_sa);
@@ -1029,7 +1030,7 @@ static bool derive_keys_internal(private_ike_init_t *this, chunk_t nonce_i,
 	}
 	if (kes != this->kes)
 	{
-		array_destroy(kes);
+		array_destroy_offset(kes, offsetof(key_exchange_t, destroy));
 	}
 	return success;
 }
