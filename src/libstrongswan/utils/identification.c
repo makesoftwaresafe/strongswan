@@ -1722,7 +1722,7 @@ METHOD(identification_t, clone_, identification_t*,
 		clone->encoded = chunk_from_str(strdup(this->encoded.ptr));
 		compile_regex(clone);
 	}
-	else if (this->encoded.len)
+	else
 	{
 		clone->encoded = chunk_clone(this->encoded);
 	}
