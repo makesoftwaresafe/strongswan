@@ -17,6 +17,7 @@ env:
   CCACHE_BASEDIR: ${{ github.workspace }}
   CCACHE_COMPRESS: true
   CCACHE_MAXSIZE: 100M
+  EVICT_CCACHE_AGE: 1200s
   OS_NAME: linux
 
 jobs:
@@ -101,6 +102,10 @@ jobs:
           ccache -z
       - run: ./scripts/test.sh build-deps
       - run: ccache -sv
+      - if: fromJSON(env.STORE_DEPS_CACHE)
+        run: |
+          ccache --evict-older-than ${{ env.EVICT_CCACHE_AGE }}
+          ccache -sv
       # delete old cache entry as we currently can't update it any other way
       - env:
           GH_TOKEN: ${{ github.token }}
@@ -121,6 +126,10 @@ jobs:
       - run: ccache -z
       - run: ./scripts/test.sh
       - run: ccache -sv
+      - if: fromJSON(env.STORE_CACHE)
+        run: |
+          ccache --evict-older-than ${{ env.EVICT_CCACHE_AGE }}
+          ccache -sv
       # delete old cache entry as we currently can't update it any other way
       - env:
           GH_TOKEN: ${{ github.token }}
@@ -207,6 +216,10 @@ jobs:
           echo "TESTS_ACTIVE_TRANSFORMS=$HOME/active-transforms.log" >> $GITHUB_ENV
       - run: ./scripts/test.sh build-deps
       - run: ccache -sv
+      - if: fromJSON(env.STORE_DEPS_CACHE)
+        run: |
+          ccache --evict-older-than ${{ env.EVICT_CCACHE_AGE }}
+          ccache -sv
       # delete old cache entry as we currently can't update it any other way
       - env:
           GH_TOKEN: ${{ github.token }}
@@ -236,7 +249,6 @@ jobs:
       - name: Verify active transforms
         run: |
           test ! -f $ACTIVE_TRANSFORMS_REF || diff -us --color=always $ACTIVE_TRANSFORMS_REF $TESTS_ACTIVE_TRANSFORMS
-      - run: ccache -sv
       - if: ${{ failure() }}
         uses: actions/upload-artifact@v6
         with:
@@ -279,6 +291,10 @@ jobs:
           ccache -z
       - run: ./scripts/test.sh build-deps
       - run: ccache -sv
+      - if: fromJSON(env.STORE_DEPS_CACHE)
+        run: |
+          ccache --evict-older-than ${{ env.EVICT_CCACHE_AGE }}
+          ccache -sv
       # delete old cache entry as we currently can't update it any other way
       - env:
           GH_TOKEN: ${{ github.token }}
@@ -299,6 +315,10 @@ jobs:
       - run: ccache -z
       - run: ./scripts/test.sh
       - run: ccache -sv
+      - if: github.event_name == 'push'
+        run: |
+          ccache --evict-older-than ${{ env.EVICT_CCACHE_AGE }}
+          ccache -sv
       # delete old cache entry as we currently can't update it any other way
       - env:
           GH_TOKEN: ${{ github.token }}
@@ -342,6 +362,10 @@ jobs:
       - run: ./scripts/test.sh deps
       - run: ./scripts/test.sh
       - run: ccache -sv
+      - if: github.event_name == 'push'
+        run: |
+          ccache --evict-older-than ${{ env.EVICT_CCACHE_AGE }}
+          ccache -sv
       # delete old cache entry as we currently can't update it any other way
       - env:
           GH_TOKEN: ${{ github.token }}

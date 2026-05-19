@@ -14,6 +14,7 @@ env:
   CCACHE_BASEDIR: ${{ github.workspace }}
   CCACHE_COMPRESS: true
   CCACHE_MAXSIZE: 100M
+  EVICT_CCACHE_AGE: 1200s
   OS_NAME: macos
 
 jobs:
@@ -52,6 +53,10 @@ jobs:
           ccache -z
       - uses: ./.github/actions/default
       - run: ccache -sv
+      - if: github.event_name == 'push'
+        run: |
+          ccache --evict-older-than ${{ env.EVICT_CCACHE_AGE }}
+          ccache -sv
       # delete old cache entry as we currently can't update it any other way
       - env:
           GH_TOKEN: ${{ github.token }}

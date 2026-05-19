@@ -16,6 +16,7 @@ env:
   # since the compilers are newly installed every time, we have to use this to
   # avoid cache misses
   CCACHE_COMPILERCHECK: content
+  EVICT_CCACHE_AGE: 1200s
   MONOLITHIC: yes
 
 jobs:
@@ -53,6 +54,10 @@ jobs:
           ccache -sz
       - uses: ./.github/actions/default
       - run: ccache -sv
+      - if: github.event_name == 'push'
+        run: |
+          ccache --evict-older-than ${{ env.EVICT_CCACHE_AGE }}
+          ccache -sv
       # delete old cache entry as we currently can't update it any other way
       - env:
           GH_TOKEN: ${{ github.token }}
@@ -114,6 +119,10 @@ jobs:
         # sometimes streaming/threading tests hang completely
         timeout-minutes: 30
       - run: ccache -sv
+      - if: github.event_name == 'push'
+        run: |
+          ccache --evict-older-than ${{ env.EVICT_CCACHE_AGE }}
+          ccache -sv
       # delete old cache entry as we currently can't update it any other way
       - env:
           GH_TOKEN: ${{ github.token }}
