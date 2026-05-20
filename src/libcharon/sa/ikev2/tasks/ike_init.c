@@ -600,14 +600,7 @@ static bool additional_key_exchange_required(private_ike_init_t *this)
  */
 static void clear_key_exchanges(private_ike_init_t *this)
 {
-	int i;
-
-	for (i = 0; i < MAX_KEY_EXCHANGES; i++)
-	{
-		this->key_exchanges[i].type = 0;
-		this->key_exchanges[i].method = 0;
-		this->key_exchanges[i].done = FALSE;
-	}
+	memset(this->key_exchanges, 0, sizeof(this->key_exchanges));
 	this->ke_index = 0;
 
 	array_destroy_offset(this->kes, offsetof(key_exchange_t, destroy));
