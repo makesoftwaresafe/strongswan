@@ -1,3 +1,23 @@
+strongswan-6.0.7
+----------------
+
+- CVE-2026-47895 - Fixed a vulnerability in libstrongswan related to the cloning
+  of certain identities that can result in a double-free and potentially remote
+  code execution.
+
+- The validity of pre-trusted self-signed certificates is now enforced.
+
+- The validity of the last certificate in the incomplete trust chain of a
+  pre-trusted certificate is now also enforced.
+
+- The `list-conn` event now includes IKE and IPsec proposals.
+
+- The new `--ike` option for `swanctl --list-conns` allows filtering connections
+  by name.
+
+- Enable mixed-family IPComp configs on Linux 6.3 and newer.
+
+
 strongswan-6.0.6
 ----------------
 
