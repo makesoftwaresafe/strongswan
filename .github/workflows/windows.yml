@@ -6,9 +6,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  actions: write
-
 env:
   TESTS_REDUCED_KEYLENGTHS: yes
   CCACHE_COMPRESS: true
@@ -34,6 +31,8 @@ jobs:
     needs: pre-check
     if: ${{ needs.pre-check.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
     strategy:
       matrix:
         test: [ win64, win32 ]
@@ -80,6 +79,8 @@ jobs:
     needs: pre-check
     if: ${{ needs.pre-check.outputs.should_skip != 'true' }}
     runs-on: windows-latest
+    permissions:
+      actions: write
     strategy:
       matrix:
         include:

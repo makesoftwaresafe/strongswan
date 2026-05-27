@@ -6,9 +6,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  actions: write
-
 env:
   # this test case does not actually test anything but tries to access system
   # directories that might be inaccessible on build hosts
@@ -35,6 +32,8 @@ jobs:
     needs: pre-check
     if: ${{ needs.pre-check.outputs.should_skip != 'true' }}
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+    permissions:
+      actions: write
     strategy:
       fail-fast: false
       matrix:
@@ -160,6 +159,8 @@ jobs:
     needs: pre-check
     if: ${{ needs.pre-check.outputs.should_skip != 'true' }}
     runs-on: ${{ matrix.os }}
+    permissions:
+      actions: write
     strategy:
       fail-fast: false
       matrix:
@@ -260,6 +261,8 @@ jobs:
     needs: pre-check
     if: ${{ needs.pre-check.outputs.should_skip != 'true' }}
     runs-on: ${{ matrix.os }}
+    permissions:
+      actions: write
     strategy:
       matrix:
         os: [ ubuntu-22.04 ]
@@ -342,6 +345,8 @@ jobs:
     if: ${{ needs.pre-check.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     container: alpine:latest
+    permissions:
+      actions: write
     env:
       TESTS_REDUCED_KEYLENGTHS: yes
       TEST: alpine

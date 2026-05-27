@@ -6,9 +6,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  actions: write
-
 env:
   CCACHE_DIR: ${{ github.workspace }}/.ccache
   CCACHE_CONTAINER: /root/.ccache
@@ -32,6 +29,8 @@ jobs:
     needs: pre-check
     if: ${{ needs.pre-check.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
     env:
       TEST: tkm
     steps:
