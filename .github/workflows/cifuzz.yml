@@ -36,6 +36,7 @@ jobs:
       with:
         oss-fuzz-project-name: 'strongswan'
         report-timeouts: true
+        fuzz-seconds: 900
         output-sarif: true
         language: c
         sanitizer: ${{ matrix.sanitizer }}
