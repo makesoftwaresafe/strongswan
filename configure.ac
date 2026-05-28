@@ -1952,7 +1952,7 @@ fi
 if test x$imc_swima = xtrue -o x$imv_swima = xtrue; then
 	AC_DEFINE([USE_JSON], [], [build code for JSON])
 fi
-if test "x$plugins_packaged_seperately" != xno; then
+if test "x$plugins_packaged_separately" != xno; then
 	AC_DEFINE([PLUGINS_PACKAGED_SEPARATELY], [], [distribution ships plugins in multiple packages])
 fi
 
