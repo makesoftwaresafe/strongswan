@@ -240,7 +240,7 @@ openssl*)
 	fi
 	;;
 gcrypt)
-	CONFIG="--disable-defaults --enable-pki --enable-gcrypt --enable-random --enable-pem --enable-pkcs1 --enable-pkcs8 --enable-gcm --enable-hmac --enable-kdf -enable-curve25519 --enable-x509 --enable-constraints"
+	CONFIG="--disable-defaults --enable-pki --enable-gcrypt --enable-random --enable-pem --enable-pkcs1 --enable-pkcs8 --enable-gcm --enable-hmac --enable-kdf --enable-curve25519 --enable-x509 --enable-constraints"
 	export TESTS_PLUGINS="test-vectors gcrypt! random pem pkcs1 pkcs8 gcm hmac kdf curve25519 x509 constraints"
 	DEPS="libgcrypt20-dev"
 	;;
