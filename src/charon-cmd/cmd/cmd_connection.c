@@ -150,7 +150,7 @@ static peer_cfg_t* create_peer_cfg(private_cmd_connection_t *this)
 	peer_cfg_t *peer_cfg;
 	proposal_t *proposal;
 	ike_cfg_create_t ike = {
-		.local = "0.0.0.0",
+		.local = "%any",
 		.remote = this->host,
 		.remote_port = IKEV2_UDP_PORT,
 		.fragmentation = FRAGMENTATION_YES,
