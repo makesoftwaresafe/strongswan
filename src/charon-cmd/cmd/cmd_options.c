@@ -31,6 +31,8 @@ cmd_option_t cmd_options[CMD_OPT_COUNT] = {
 	  "set the default log level (-1..4, default: 1)", {}},
 	{ CMD_OPT_HOST, "host", required_argument, "hostname",
 	  "DNS name or address to connect to", {}},
+	{ CMD_OPT_HOST_LOCAL, "host-local", required_argument, "hostname",
+	  "DNS name or address to connect from (default: %any)", {}},
 	{ CMD_OPT_IDENTITY, "identity", required_argument, "identity",
 	  "identity the client uses for the IKE exchange", {}},
 	{ CMD_OPT_EAP_IDENTITY, "eap-identity", required_argument, "eap-identity",

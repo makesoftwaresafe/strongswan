@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Tobias Brunner
+ * Copyright (C) 2013-2026 Tobias Brunner
  * Copyright (C) 2013 Martin Willi
  *
  * Copyright (C) secunet Security Networks AG
@@ -103,6 +103,11 @@ struct private_cmd_connection_t {
 	char *host;
 
 	/**
+	 * Hostname to connect from
+	 */
+	char *host_local;
+
+	/**
 	 * Server identity, or NULL to use host
 	 */
 	char *server;
@@ -150,7 +155,7 @@ static peer_cfg_t* create_peer_cfg(private_cmd_connection_t *this)
 	peer_cfg_t *peer_cfg;
 	proposal_t *proposal;
 	ike_cfg_create_t ike = {
-		.local = "%any",
+		.local = this->host_local ?: "%any",
 		.remote = this->host,
 		.remote_port = IKEV2_UDP_PORT,
 		.fragmentation = FRAGMENTATION_YES,
@@ -501,6 +506,9 @@ METHOD(cmd_connection_t, handle, bool,
 	{
 		case CMD_OPT_HOST:
 			this->host = arg;
+			break;
+		case CMD_OPT_HOST_LOCAL:
+			this->host_local = arg;
 			break;
 		case CMD_OPT_REMOTE_IDENTITY:
 			this->server = arg;
