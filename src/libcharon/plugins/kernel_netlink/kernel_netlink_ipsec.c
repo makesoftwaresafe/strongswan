@@ -371,6 +371,11 @@ struct private_kernel_netlink_ipsec_t {
 	bool sa_lastused;
 
 	/**
+	 * Whether the kernel accepts XFRM_STATE_AF_UNSPEC for transport mode
+	 */
+	bool sa_unspec_transport;
+
+	/**
 	 * Whether the kernel supports setting the SA direction
 	 */
 	bool sa_dir;
@@ -1861,6 +1866,10 @@ METHOD(kernel_ipsec_t, add_sa, status_t,
 			if (original_mode == MODE_TUNNEL)
 			{	/* don't install selectors for switched SAs.  because only one
 				 * selector can be installed other traffic would get dropped */
+				if (this->sa_unspec_transport)
+				{
+					sa->flags |= XFRM_STATE_AF_UNSPEC;
+				}
 				break;
 			}
 			if (data->src_ts->get_first(data->src_ts,
@@ -4311,9 +4320,12 @@ static void check_kernel_features(private_kernel_netlink_ipsec_t *this)
 		{
 			case 2:
 			case 3:
-				/* before 6.2 the kernel only provided the last used time for
+				/* before 6.2, the kernel only provided the last used time for
 				 * specific outbound IPv6 SAs */
 				this->sa_lastused = a > 6 || (a == 6 && b >= 2);
+				/* before 6.3, the kernel rejected XFRM_STATE_AF_UNSPEC on
+				 * transport mode SAs */
+				this->sa_unspec_transport = a > 6 || (a == 6 && b >= 3);
 				/* 6.10 added support for SA direction and enforces certain
 				 * flags e.g. 0 replay window for outbound SAs */
 				this->sa_dir = a > 6 || (a == 6 && b >= 10);
