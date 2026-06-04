@@ -505,6 +505,12 @@ static status_t process_synchronize(private_eap_aka_server_t *this,
 	simaka_attribute_t type;
 	chunk_t data, auts = chunk_empty;
 
+	if (this->pending != AKA_CHALLENGE)
+	{
+		DBG1(DBG_IKE, "received %N, but not expected",
+			 simaka_subtype_names, AKA_SYNCHRONIZATION_FAILURE);
+		return FAILED;
+	}
 	if (this->synchronized)
 	{
 		DBG1(DBG_IKE, "received %N, but peer did already resynchronize",
