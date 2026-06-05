@@ -1122,6 +1122,44 @@ static status_t build_response(private_task_manager_t *this, message_t *request)
 }
 
 /**
+ * Send a notify back to the sender
+ */
+static void send_notify_response(private_task_manager_t *this,
+								 message_t *request, notify_type_t type,
+								 chunk_t data)
+{
+	message_t *response;
+	packet_t *packet;
+	host_t *me, *other;
+
+	response = message_create(IKEV2_MAJOR_VERSION, IKEV2_MINOR_VERSION);
+	response->set_exchange_type(response, request->get_exchange_type(request));
+	response->set_request(response, FALSE);
+	response->set_message_id(response, request->get_message_id(request));
+	response->add_notify(response, FALSE, type, data);
+	me = this->ike_sa->get_my_host(this->ike_sa);
+	if (me->is_anyaddr(me))
+	{
+		me = request->get_destination(request);
+		this->ike_sa->set_my_host(this->ike_sa, me->clone(me));
+	}
+	other = this->ike_sa->get_other_host(this->ike_sa);
+	if (other->is_anyaddr(other))
+	{
+		other = request->get_source(request);
+		this->ike_sa->set_other_host(this->ike_sa, other->clone(other));
+	}
+	response->set_source(response, me->clone(me));
+	response->set_destination(response, other->clone(other));
+	if (this->ike_sa->generate_message(this->ike_sa, response,
+									   &packet) == SUCCESS)
+	{
+		charon->sender->send(charon->sender, packet);
+	}
+	response->destroy(response);
+}
+
+/**
  * handle an incoming request message
  */
 static status_t process_request(private_task_manager_t *this,
@@ -1232,6 +1270,21 @@ static status_t process_request(private_task_manager_t *this,
 				}
 				array_insert(this->passive_tasks, ARRAY_TAIL, task);
 				break;
+			}
+			case IKE_FOLLOWUP_KE:
+			{
+				if (state == IKE_CREATED ||
+					state == IKE_CONNECTING)
+				{
+					DBG1(DBG_IKE, "received IKE_FOLLOWUP_KE request for "
+						 "unestablished IKE_SA, rejected");
+					return FAILED;
+				}
+				/* receiving this when we don't have an active rekey task is
+				 * an error, we send back a notify accordingly */
+				send_notify_response(this, message, STATE_NOT_FOUND,
+									 chunk_empty);
+				return SUCCESS;
 			}
 			case INFORMATIONAL:
 			{
@@ -1522,44 +1575,6 @@ static status_t handle_fragment(private_task_manager_t *this,
 		*defrag = NULL;
 	}
 	return status;
-}
-
-/**
- * Send a notify back to the sender
- */
-static void send_notify_response(private_task_manager_t *this,
-								 message_t *request, notify_type_t type,
-								 chunk_t data)
-{
-	message_t *response;
-	packet_t *packet;
-	host_t *me, *other;
-
-	response = message_create(IKEV2_MAJOR_VERSION, IKEV2_MINOR_VERSION);
-	response->set_exchange_type(response, request->get_exchange_type(request));
-	response->set_request(response, FALSE);
-	response->set_message_id(response, request->get_message_id(request));
-	response->add_notify(response, FALSE, type, data);
-	me = this->ike_sa->get_my_host(this->ike_sa);
-	if (me->is_anyaddr(me))
-	{
-		me = request->get_destination(request);
-		this->ike_sa->set_my_host(this->ike_sa, me->clone(me));
-	}
-	other = this->ike_sa->get_other_host(this->ike_sa);
-	if (other->is_anyaddr(other))
-	{
-		other = request->get_source(request);
-		this->ike_sa->set_other_host(this->ike_sa, other->clone(other));
-	}
-	response->set_source(response, me->clone(me));
-	response->set_destination(response, other->clone(other));
-	if (this->ike_sa->generate_message(this->ike_sa, response,
-									   &packet) == SUCCESS)
-	{
-		charon->sender->send(charon->sender, packet);
-	}
-	response->destroy(response);
 }
 
 /**

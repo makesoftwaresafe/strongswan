@@ -1918,6 +1918,7 @@ START_TEST(test_collision_delayed_response_multi_ke_failure)
 	/* IKE_FOLLOWUP_KE { KEi, N(ADD_KE) } --> */
 	assert_payload(IN, PLV2_KEY_EXCHANGE);
 	assert_notify(IN, ADDITIONAL_KEY_EXCHANGE);
+	assert_single_notify(OUT, STATE_NOT_FOUND);
 	exchange_test_helper->process_message(exchange_test_helper, b, NULL);
 
 	/* ike_updown/rekey/child_updown */
