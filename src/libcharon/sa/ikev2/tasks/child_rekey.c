@@ -1128,8 +1128,22 @@ METHOD(child_rekey_t, handle_delete, child_rekey_collision_t,
 	return CHILD_REKEY_COLLISION_NONE;
 }
 
+/**
+ * Clear the colliding passive task if it did not complete successfully.
+ */
+static void clear_collision(private_child_rekey_t *this, task_t *other)
+{
+	if (this->collision == other)
+	{
+		DBG1(DBG_IKE, "colliding passive rekeying for CHILD_SA %s{%u} "
+			 "failed", this->child_sa->get_name(this->child_sa),
+			 this->child_sa->get_unique_id(this->child_sa));
+		this->collision = NULL;
+	}
+}
+
 METHOD(child_rekey_t, collide, bool,
-	private_child_rekey_t *this, task_t *other)
+	private_child_rekey_t *this, task_t *other, bool done)
 {
 	private_child_rekey_t *rekey = (private_child_rekey_t*)other;
 	child_sa_t *other_child;
@@ -1143,16 +1157,25 @@ METHOD(child_rekey_t, collide, bool,
 	other_child = rekey->child_create->get_child(rekey->child_create);
 	if (!other_child)
 	{
-		/* ignore passive tasks that did not successfully create a CHILD_SA */
+		/* ignore passive tasks that did not successfully create a CHILD_SA,
+		 * if we are already tracking it in the multi-KE case, clear it */
+		clear_collision(this, other);
 		return FALSE;
 	}
 	if (other_child->get_state(other_child) != CHILD_INSTALLED)
 	{
-		DBG1(DBG_IKE, "colliding passive rekeying for CHILD_SA %s{%u} is not "
-			 "yet complete", this->child_sa->get_name(this->child_sa),
-			 this->child_sa->get_unique_id(this->child_sa));
-		/* we do reference the task to check its state later */
-		this->collision = other;
+		if (done)
+		{	/* passive task failed, clear it if necessary */
+			clear_collision(this, other);
+		}
+		else
+		{
+			DBG1(DBG_IKE, "colliding passive rekeying for CHILD_SA %s{%u} is "
+				 "not yet complete", this->child_sa->get_name(this->child_sa),
+				 this->child_sa->get_unique_id(this->child_sa));
+			/* we do reference the task to check its state later */
+			this->collision = other;
+		}
 		return FALSE;
 	}
 	if (this->collision && this->collision != other)

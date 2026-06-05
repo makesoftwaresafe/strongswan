@@ -927,7 +927,8 @@ static status_t process_response(private_task_manager_t *this,
  * Handle exchange collisions, returns TRUE if the given passive task was
  * adopted by the active task and the task manager lost control over it.
  */
-static bool handle_collisions(private_task_manager_t *this, task_t *task)
+static bool handle_collisions(private_task_manager_t *this, task_t *task,
+							  bool done)
 {
 	enumerator_t *enumerator;
 	task_t *active;
@@ -951,7 +952,7 @@ static bool handle_collisions(private_task_manager_t *this, task_t *task)
 					if (type == TASK_IKE_REKEY || type == TASK_IKE_DELETE)
 					{
 						ike_rekey_t *rekey = (ike_rekey_t*)active;
-						adopted = rekey->collide(rekey, task);
+						adopted = rekey->collide(rekey, task, done);
 						break;
 					}
 					continue;
@@ -959,7 +960,7 @@ static bool handle_collisions(private_task_manager_t *this, task_t *task)
 					if (type == TASK_CHILD_REKEY)
 					{
 						child_rekey_t *rekey = (child_rekey_t*)active;
-						adopted = rekey->collide(rekey, task);
+						adopted = rekey->collide(rekey, task, done);
 						break;
 					}
 					continue;
@@ -1011,14 +1012,14 @@ static status_t build_response(private_task_manager_t *this, message_t *request)
 			case SUCCESS:
 				/* task completed, remove it */
 				array_remove_at(this->passive_tasks, enumerator);
-				if (!handle_collisions(this, task))
+				if (!handle_collisions(this, task, TRUE))
 				{
 					task->destroy(task);
 				}
 				break;
 			case NEED_MORE:
 				/* processed, but task needs another exchange */
-				if (handle_collisions(this, task))
+				if (handle_collisions(this, task, FALSE))
 				{
 					array_remove_at(this->passive_tasks, enumerator);
 				}
@@ -1029,7 +1030,7 @@ static status_t build_response(private_task_manager_t *this, message_t *request)
 				/* FALL */
 			case DESTROY_ME:
 				/* destroy IKE_SA, but SEND response first */
-				if (handle_collisions(this, task))
+				if (handle_collisions(this, task, FALSE))
 				{
 					array_remove_at(this->passive_tasks, enumerator);
 				}
