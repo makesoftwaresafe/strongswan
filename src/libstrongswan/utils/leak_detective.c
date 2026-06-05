@@ -680,6 +680,7 @@ static char *whitelist[] = {
  */
 static char *unknown_memory_whitelist[] = {
 	"tzset",
+	"OPENSSL_cleanup",
 };
 
 /**
