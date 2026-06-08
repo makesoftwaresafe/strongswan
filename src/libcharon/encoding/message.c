@@ -1398,7 +1398,7 @@ static char* get_string(private_message_t *this, char *buf, int len)
 						   payload->get_type(payload));
 		if (written >= len || written < 0)
 		{
-			return buf;
+			goto err;
 		}
 		pos += written;
 		len -= written;
@@ -1424,7 +1424,7 @@ static char* get_string(private_message_t *this, char *buf, int len)
 			}
 			if (written >= len || written < 0)
 			{
-				return buf;
+				goto err;
 			}
 			pos += written;
 			len -= written;
@@ -1454,7 +1454,7 @@ static char* get_string(private_message_t *this, char *buf, int len)
 							   eap->get_code(eap), method);
 			if (written >= len || written < 0)
 			{
-				return buf;
+				goto err;
 			}
 			pos += written;
 			len -= written;
@@ -1495,7 +1495,8 @@ static char* get_string(private_message_t *this, char *buf, int len)
 								   attribute->get_type(attribute));
 				if (written >= len || written < 0)
 				{
-					return buf;
+					attributes->destroy(attributes);
+					goto err;
 				}
 				pos += written;
 				len -= written;
@@ -1507,7 +1508,7 @@ static char* get_string(private_message_t *this, char *buf, int len)
 				written = snprintf(pos, len, ")");
 				if (written >= len || written < 0)
 				{
-					return buf;
+					goto err;
 				}
 				pos += written;
 				len -= written;
@@ -1529,7 +1530,7 @@ static char* get_string(private_message_t *this, char *buf, int len)
 			}
 			if (written >= len || written < 0)
 			{
-				return buf;
+				goto err;
 			}
 			pos += written;
 			len -= written;
@@ -1544,7 +1545,7 @@ static char* get_string(private_message_t *this, char *buf, int len)
 							   frag->get_total_fragments(frag));
 			if (written >= len || written < 0)
 			{
-				return buf;
+				goto err;
 			}
 			pos += written;
 			len -= written;
@@ -1557,16 +1558,16 @@ static char* get_string(private_message_t *this, char *buf, int len)
 			written = snprintf(pos, len, "(%d)", unknown->get_type(unknown));
 			if (written >= len || written < 0)
 			{
-				return buf;
+				goto err;
 			}
 			pos += written;
 			len -= written;
 		}
 	}
-	enumerator->destroy(enumerator);
-
-	/* remove last space */
 	snprintf(pos, len, " ]");
+
+err:
+	enumerator->destroy(enumerator);
 	return buf;
 }
 #endif
