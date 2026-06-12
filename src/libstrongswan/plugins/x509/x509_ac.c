@@ -905,8 +905,8 @@ METHOD(certificate_t, issued_by, bool,
 	private_x509_ac_t *this, certificate_t *issuer,
 	signature_params_t **scheme)
 {
-	public_key_t *key;
-	bool valid;
+	public_key_t *key = NULL;
+	bool valid = FALSE;
 	x509_t *x509 = (x509_t*)issuer;
 
 	/* check if issuer is an X.509 AA certificate */
@@ -930,7 +930,7 @@ METHOD(certificate_t, issued_by, bool,
 		if (!key->get_fingerprint(key, KEYID_PUBKEY_SHA1, &fingerprint) ||
 			!chunk_equals(fingerprint, this->authKeyIdentifier))
 		{
-			return FALSE;
+			goto out;
 		}
 	}
 	else
@@ -938,21 +938,23 @@ METHOD(certificate_t, issued_by, bool,
 		if (!this->issuerName->equals(this->issuerName,
 									  issuer->get_subject(issuer)))
 		{
-			return FALSE;
+			goto out;
 		}
 	}
 
 	if (!key)
 	{
-		return FALSE;
+		goto out;
 	}
 	valid = key->verify(key, this->scheme->scheme, this->scheme->params,
 						this->certificateInfo, this->signature);
-	key->destroy(key);
 	if (valid && scheme)
 	{
 		*scheme = signature_params_clone(this->scheme);
 	}
+
+out:
+	DESTROY_IF(key);
 	return valid;
 }
 
