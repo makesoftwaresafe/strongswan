@@ -186,41 +186,25 @@ extern bool x509_parse_generalNames(chunk_t blob, int level0, bool implicit,
 static bool parse_directoryName(chunk_t blob, int level, bool implicit,
 								identification_t **name)
 {
-	identification_t *directoryName;
-	enumerator_t *enumerator;
-	bool first = TRUE;
 	linked_list_t *list;
 
 	list = linked_list_create();
 	if (!x509_parse_generalNames(blob, level, implicit, list))
 	{
+		list->destroy_offset(list, offsetof(identification_t, destroy));
+		return FALSE;
+	}
+	if (list->remove_first(list, (void**)name) != SUCCESS)
+	{
+		DBG1(DBG_ASN, "no directoryName found");
 		list->destroy(list);
 		return FALSE;
 	}
-
-	enumerator = list->create_enumerator(list);
-	while (enumerator->enumerate(enumerator, &directoryName))
+	if (list->get_count(list))
 	{
-		if (first)
-		{
-			*name = directoryName;
-			first = FALSE;
-		}
-		else
-		{
-			DBG1(DBG_ASN, "more than one directory name - first selected");
-			directoryName->destroy(directoryName);
-			break;
-		}
+		DBG1(DBG_ASN, "more than one directory name - first selected");
 	}
-	enumerator->destroy(enumerator);
-	list->destroy(list);
-
-	if (first)
-	{
-		DBG1(DBG_ASN, "no directoryName found");
-		return FALSE;
-	}
+	list->destroy_offset(list, offsetof(identification_t, destroy));
 	return TRUE;
 }
 
