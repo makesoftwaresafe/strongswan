@@ -132,6 +132,10 @@ typedef struct {
 METHOD(enumerator_t, cert_destroy, void,
 	cert_enumerator_t *this)
 {
+	if (this->certs)
+	{
+		sk_X509_pop_free(this->certs, X509_free);
+	}
 	DESTROY_IF(this->cert);
 	free(this);
 }
