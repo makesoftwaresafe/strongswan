@@ -898,7 +898,11 @@ METHOD(certificate_t, has_issuer, id_match_t,
 	{
 		return ID_MATCH_PERFECT;
 	}
-	return this->issuerName->matches(this->issuerName, issuer);
+	if (this->issuerName)
+	{
+		return this->issuerName->matches(this->issuerName, issuer);
+	}
+	return ID_MATCH_NONE;
 }
 
 METHOD(certificate_t, issued_by, bool,
@@ -935,7 +939,8 @@ METHOD(certificate_t, issued_by, bool,
 	}
 	else
 	{
-		if (!this->issuerName->equals(this->issuerName,
+		if (!this->issuerName ||
+			!this->issuerName->equals(this->issuerName,
 									  issuer->get_subject(issuer)))
 		{
 			goto out;
