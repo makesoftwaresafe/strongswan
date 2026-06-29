@@ -168,20 +168,6 @@ system_uses_openssl3()
 
 prepare_system_openssl()
 {
-	# On systems that ship OpenSSL 3 (e.g. Ubuntu 22.04+), we require debug
-	# symbols to whitelist leaks
-	if test "$1" = "deps"; then
-		echo "deb http://ddebs.ubuntu.com $(lsb_release -cs) main restricted
-			deb http://ddebs.ubuntu.com $(lsb_release -cs)-updates main restricted
-			deb http://ddebs.ubuntu.com $(lsb_release -cs)-proposed main restricted" | \
-			sudo tee -a /etc/apt/sources.list.d/ddebs.list
-		sudo apt-get install -qq ubuntu-dbgsym-keyring
-		if [ "$ID" = "ubuntu" -a "$VERSION_ID" = "24.04" ]; then
-			DEPS="$DEPS libssl3t64-dbgsym"
-		else
-			DEPS="$DEPS libssl3-dbgsym"
-		fi
-	fi
 	if test "$LEAK_DETECTIVE" = "yes"; then
 		# make sure we can properly whitelist functions with leak detective
 		DEPS="$DEPS binutils-dev"
