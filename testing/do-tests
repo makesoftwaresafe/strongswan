@@ -1025,7 +1025,8 @@ echo_failed "Failed : $failed_cnt"
 
 echo
 echo "The results are available in $TODAYDIR"
-echo "or via the link http://$ipv4_winnetou/testresults/$TESTDATE"
+URL=http://$ipv4_winnetou/testresults/$TESTDATE
+echo -e "or via the link \033]8;;$URL\a$URL\033]8;;\a"
 
 ENDDATE=`date +%Y%m%d-%H%M-%S`
 echo
