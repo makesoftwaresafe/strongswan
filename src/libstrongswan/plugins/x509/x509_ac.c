@@ -249,26 +249,24 @@ static void parse_roleSyntax(chunk_t blob, int level0)
  */
 static const asn1Object_t ietfAttrSyntaxObjects[] =
 {
-	{ 0, "ietfAttrSyntax",		ASN1_SEQUENCE,		ASN1_NONE }, /*  0 */
-	{ 1,   "policyAuthority",	ASN1_CONTEXT_C_0,	ASN1_OPT |
-													ASN1_BODY }, /*  1 */
-	{ 1,   "end opt",			ASN1_EOC,			ASN1_END  }, /*  2 */
-	{ 1,   "values",			ASN1_SEQUENCE,		ASN1_LOOP }, /*  3 */
-	{ 2,     "octets",			ASN1_OCTET_STRING,	ASN1_OPT |
-													ASN1_BODY }, /*  4 */
-	{ 2,     "end choice",		ASN1_EOC,			ASN1_END  }, /*  5 */
-	{ 2,     "oid",				ASN1_OID,			ASN1_OPT |
-													ASN1_BODY }, /*  6 */
-	{ 2,     "end choice",		ASN1_EOC,			ASN1_END  }, /*  7 */
-	{ 2,     "string",			ASN1_UTF8STRING,	ASN1_OPT |
-													ASN1_BODY }, /*  8 */
-	{ 2,     "end choice",		ASN1_EOC,			ASN1_END  }, /*  9 */
-	{ 1,   "end loop",			ASN1_EOC,			ASN1_END  }, /* 10 */
-	{ 0, "exit",				ASN1_EOC,			ASN1_EXIT }
+	{ 0, "ietfAttrSyntax",		ASN1_SEQUENCE,		ASN1_NONE            }, /*  0 */
+	{ 1,   "policyAuthority",	ASN1_CONTEXT_C_0,	ASN1_OPT|ASN1_BODY   }, /*  1 */
+	{ 1,   "end opt",			ASN1_EOC,			ASN1_END             }, /*  2 */
+	{ 1,   "values",			ASN1_SEQUENCE,		ASN1_LOOP            }, /*  3 */
+	{ 2,     "value choice",	ASN1_EOC,			ASN1_CHOICE          }, /*  4 */
+	{ 3,       "octets",		ASN1_OCTET_STRING,	ASN1_OPT|ASN1_BODY   }, /*  5 */
+	{ 3,       "end choice",	ASN1_EOC,			ASN1_END|ASN1_CH     }, /*  6 */
+	{ 3,       "oid",			ASN1_OID,			ASN1_OPT|ASN1_BODY   }, /*  7 */
+	{ 3,       "end choice",	ASN1_EOC,			ASN1_END|ASN1_CH     }, /*  8 */
+	{ 3,       "string",		ASN1_UTF8STRING,	ASN1_OPT|ASN1_BODY   }, /*  9 */
+	{ 3,       "end choice",	ASN1_EOC,			ASN1_END|ASN1_CH     }, /* 10 */
+	{ 2,     "end choices",		ASN1_EOC,			ASN1_END|ASN1_CHOICE }, /* 11 */
+	{ 1,   "end loop",			ASN1_EOC,			ASN1_END             }, /* 12 */
+	{ 0, "exit",				ASN1_EOC,			ASN1_EXIT            }
 };
-#define IETF_ATTR_OCTETS	 4
-#define IETF_ATTR_OID		 6
-#define IETF_ATTR_STRING	 8
+#define IETF_ATTR_OCTETS	 5
+#define IETF_ATTR_OID		 7
+#define IETF_ATTR_STRING	 9
 
 /**
  * Parse group memberships, IETF attributes
