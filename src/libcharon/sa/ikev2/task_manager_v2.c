@@ -1172,9 +1172,18 @@ static status_t process_request(private_task_manager_t *this,
 	delete_payload_t *delete;
 	ike_sa_state_t state;
 
+	state = this->ike_sa->get_state(this->ike_sa);
+	if (message->get_exchange_type(message) == CREATE_CHILD_SA &&
+		(state == IKE_CREATED || state == IKE_CONNECTING))
+	{
+		DBG1(DBG_IKE, "received CREATE_CHILD_SA request for "
+			 "unestablished IKE_SA, rejected");
+		return FAILED;
+	}
+
+	/* create tasks depending on request type, if not already some queued */
 	if (array_count(this->passive_tasks) == 0)
-	{	/* create tasks depending on request type, if not already some queued */
-		state = this->ike_sa->get_state(this->ike_sa);
+	{
 		switch (message->get_exchange_type(message))
 		{
 			case IKE_SA_INIT:
@@ -1214,14 +1223,6 @@ static status_t process_request(private_task_manager_t *this,
 			case CREATE_CHILD_SA:
 			{	/* FIXME: we should prevent this on mediation connections */
 				bool notify_found = FALSE, ts_found = FALSE;
-
-				if (state == IKE_CREATED ||
-					state == IKE_CONNECTING)
-				{
-					DBG1(DBG_IKE, "received CREATE_CHILD_SA request for "
-						 "unestablished IKE_SA, rejected");
-					return FAILED;
-				}
 
 				enumerator = message->create_payload_enumerator(message);
 				while (enumerator->enumerate(enumerator, &payload))
