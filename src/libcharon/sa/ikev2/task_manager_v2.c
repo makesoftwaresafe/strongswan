@@ -1172,18 +1172,10 @@ static status_t process_request(private_task_manager_t *this,
 	delete_payload_t *delete;
 	ike_sa_state_t state;
 
-	state = this->ike_sa->get_state(this->ike_sa);
-	if (message->get_exchange_type(message) == CREATE_CHILD_SA &&
-		(state == IKE_CREATED || state == IKE_CONNECTING))
-	{
-		DBG1(DBG_IKE, "received CREATE_CHILD_SA request for "
-			 "unestablished IKE_SA, rejected");
-		return FAILED;
-	}
-
 	/* create tasks depending on request type, if not already some queued */
 	if (array_count(this->passive_tasks) == 0)
 	{
+		state = this->ike_sa->get_state(this->ike_sa);
 		switch (message->get_exchange_type(message))
 		{
 			case IKE_SA_INIT:
@@ -1274,13 +1266,6 @@ static status_t process_request(private_task_manager_t *this,
 			}
 			case IKE_FOLLOWUP_KE:
 			{
-				if (state == IKE_CREATED ||
-					state == IKE_CONNECTING)
-				{
-					DBG1(DBG_IKE, "received IKE_FOLLOWUP_KE request for "
-						 "unestablished IKE_SA, rejected");
-					return FAILED;
-				}
 				/* receiving this when we don't have an active rekey task is
 				 * an error, we send back a notify accordingly */
 				send_notify_response(this, message, STATE_NOT_FOUND,
@@ -1734,7 +1719,7 @@ static inline bool reject_request(private_task_manager_t *this,
 	state = this->ike_sa->get_state(this->ike_sa);
 	type = msg->get_exchange_type(msg);
 
-	/* reject initial messages if not received in specific states */
+	/* reject messages if not received in specific states */
 	switch (type)
 	{
 		case IKE_SA_INIT:
@@ -1747,6 +1732,10 @@ static inline bool reject_request(private_task_manager_t *this,
 			break;
 		case IKE_AUTH:
 			reject = state != IKE_CONNECTING;
+			break;
+		case CREATE_CHILD_SA:
+		case IKE_FOLLOWUP_KE:
+			reject = state == IKE_CREATED || state == IKE_CONNECTING;
 			break;
 		default:
 			break;
@@ -1965,7 +1954,7 @@ METHOD(task_manager_t, process_message, status_t,
 	if (msg->get_request(msg))
 	{
 		/* special handling for requests happens in is_retransmit()
-		 * reject initial messages if not received in specific states,
+		 * reject messages if not received in specific states,
 		 * after rekeying we only expect a DELETE in an INFORMATIONAL */
 		if (reject_request(this, msg))
 		{
