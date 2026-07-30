@@ -523,6 +523,7 @@ static bool parse_certificate(private_x509_ac_t *this)
 						DBG2(DBG_ASN, "  need to parse crlDistributionPoints");
 						break;
 					case OID_AUTHORITY_KEY_ID:
+						chunk_free(&this->authKeyIdentifier);
 						this->authKeyIdentifier =
 								x509_parse_authorityKeyIdentifier(object,
 											level, &this->authKeySerialNumber);
