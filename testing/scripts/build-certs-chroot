@@ -125,6 +125,7 @@ mkdir -p ${RFC3779_DIR}/certs
 mkdir -p ${SHA3_RSA_DIR}/certs
 mkdir -p ${ED25519_DIR}/certs
 mkdir -p ${MONSTER_DIR}/certs
+mkdir -p ${TLS_FRAG_DIR}
 
 ################################################################################
 # strongSwan Root CA                                                           #
